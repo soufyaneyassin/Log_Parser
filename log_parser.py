@@ -1,7 +1,12 @@
 from pathlib import Path
 import re
+import csv
 
+#defining files paths
 log_file = Path("/var/log/nginx.log")
+results_file = Path("logs_results.csv")
+
+#extracting the methods (GET,POST...), codes(404,200,304...) from the log file using regex
 pattern = re.compile(r'(GET|PUT|POST|DELETE)\s.*"\s(\d{3})')
 methods_found = {}
 try:
@@ -20,3 +25,14 @@ except FileNotFoundError:
      print(f"Error: file {log_file} Not found")
 except Exception as e:
      print(f"an Error Occured: {e}")
+# after walking through the log file, we will write the results into the csv file
+try:
+     with open(results_file, mode="w", newline='') as csv_file:
+          writer = csv.writer(csv_file)
+          writer.writerow(["Method", "Code", "Count"])
+          for method, codes in methods_found.items():
+              for code, value in methods_found[method].items():
+                   writer.writerow([method, code, value])
+     print(f"CSV file '{results_file}' created successfully.")
+except Exception as e:
+      print(f"an Error Occured: {e}")
